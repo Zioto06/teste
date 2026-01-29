@@ -8,6 +8,10 @@ from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.responses import StreamingResponse, JSONResponse
 from pydantic import BaseModel, Field
 from passlib.context import CryptContext
+from fastapi.responses import HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 
 from sqlalchemy import (
     create_engine, Column, Integer, String, Boolean,
@@ -149,6 +153,14 @@ class AdminBolsistaCreate(BaseModel):
 # App
 # -----------------------------
 app = FastAPI(title="Controle Presencial - Incubadora")
+
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="templates")
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+
 
 @app.on_event("startup")
 def startup():
@@ -295,3 +307,4 @@ def home():
             "export_csv": "GET /admin/export.csv?start=YYYY-MM-DD&end=YYYY-MM-DD (header x-admin-token)"
         }
     })
+
