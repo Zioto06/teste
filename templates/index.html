@@ -1,34 +1,179 @@
-<!doctype html>
-<html lang="pt-br">
+<!DOCTYPE html>
+<html lang="pt-BR">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
   <title>Controle Presencial - Incubadora</title>
-  <link rel="stylesheet" href="/static/style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at top, #0f172a, #020617);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: Arial, Helvetica, sans-serif;
+      color: #e5e7eb;
+    }
+
+    .card {
+      background: #020617cc;
+      border-radius: 20px;
+      padding: 30px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 26px;
+    }
+
+    h2 {
+      margin-top: 6px;
+      font-size: 14px;
+      font-weight: normal;
+      color: #94a3b8;
+    }
+
+    label {
+      display: block;
+      margin-top: 18px;
+      font-size: 14px;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      margin-top: 6px;
+      border-radius: 12px;
+      border: none;
+      outline: none;
+      font-size: 16px;
+      background: #020617;
+      color: #fff;
+      box-shadow: inset 0 0 0 1px #1e293b;
+    }
+
+    .buttons {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+
+    button {
+      flex: 1;
+      padding: 14px;
+      font-size: 16px;
+      border-radius: 14px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+    }
+
+    .entrada {
+      background: #2563eb;
+    }
+
+    .saida {
+      background: #dc2626;
+    }
+
+    .mensagem {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      display: none;
+      font-size: 14px;
+    }
+
+    .ok {
+      background: #064e3b;
+      color: #d1fae5;
+    }
+
+    .erro {
+      background: #7f1d1d;
+      color: #fee2e2;
+    }
+
+    .dica {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  </style>
 </head>
+
 <body>
   <div class="card">
     <h1>Controle Presencial</h1>
-    <p class="sub">Incubadora — Registro de presença</p>
+    <h2>Incubadora — Registro de presença</h2>
 
     <label>CPF (somente números)</label>
-    <input id="cpf" inputmode="numeric" placeholder="Ex: 12345678901" maxlength="11" />
+    <input id="cpf" maxlength="11" placeholder="Digite o CPF" />
 
     <label>Últimos dígitos (ex.: 4 últimos)</label>
-    <input id="ultimos" inputmode="numeric" placeholder="Ex: 8901" maxlength="4" />
+    <input id="digitos" maxlength="4" placeholder="Ex.: 1234" />
 
-    <div class="row">
-      <button id="btnEntrada" class="btn primary">✅ Entrada</button>
-      <button id="btnSaida" class="btn danger">🚪 Saída</button>
+    <div class="buttons">
+      <button class="entrada" onclick="registrar('entrada')">✅ Entrada</button>
+      <button class="saida" onclick="registrar('saida')">🚪 Saída</button>
     </div>
 
-    <div id="msg" class="msg hidden"></div>
+    <div id="mensagem" class="mensagem"></div>
 
-    <p class="hint">
+    <div class="dica">
       Dica: digite o CPF e os últimos dígitos e clique em Entrada ou Saída.
-    </p>
+    </div>
   </div>
 
-  <script src="/static/script.js"></script>
+  <script>
+    async function registrar(tipo) {
+      const cpf = document.getElementById("cpf").value.trim();
+      const digitos = document.getElementById("digitos").value.trim();
+      const msg = document.getElementById("mensagem");
+
+      msg.style.display = "none";
+
+      if (!cpf || !digitos) {
+        msg.className = "mensagem erro";
+        msg.innerText = "Preencha todos os campos.";
+        msg.style.display = "block";
+        return;
+      }
+
+      try {
+        const response = await fetch("/check", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            cpf: cpf,
+            digitos: digitos,
+            tipo: tipo
+          })
+        });
+
+        const data = await response.json();
+
+        msg.className = "mensagem ok";
+        msg.innerText = data.mensagem || "Registro realizado com sucesso.";
+        msg.style.display = "block";
+
+        document.getElementById("digitos").value = "";
+
+      } catch (error) {
+        msg.className = "mensagem erro";
+        msg.innerText = "Erro ao comunicar com o servidor.";
+        msg.style.display = "block";
+      }
+    }
+  </script>
 </body>
 </html>
