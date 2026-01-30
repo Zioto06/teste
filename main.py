@@ -20,7 +20,7 @@ from openpyxl import Workbook
 # Config
 # -----------------------------
 DATABASE_URL = os.environ.get("DATABASE_URL", "")
-ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "troque-este-token")
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN", "admin-incubadora-2026")
 ALLOWED_IPS = [ip.strip() for ip in os.environ.get("ALLOWED_IPS", "").split(",") if ip.strip()]
 
 # Ajuste de fuso: Brasil (-03:00)
@@ -359,3 +359,4 @@ def admin_export_xlsx(start: str, end: str, request: Request, db: Session = Depe
         media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
         headers={"Content-Disposition": f'attachment; filename="{filename}"'}
     )
+
